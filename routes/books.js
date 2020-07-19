@@ -13,7 +13,7 @@ function asyncHandler(cb) {
   };
 }
 
-// get /books - Shows the full list of books.
+// get /books - Shows the full list of books. OK
 router.get(
   "/",
   asyncHandler(async (req, res) => {
@@ -25,23 +25,25 @@ router.get(
   })
 );
 
-// get /books/new - Shows the create new book form.
+// get /books/new - Shows the create new book form. OK
 router.get(
   "/new",
   asyncHandler(async (req, res) => {
     res.render("new-book", { title: "New Book" });
   })
 );
+
 // post /books/new - Posts a new book to the database.
 router.post(
   "/",
   asyncHandler(async (req, res, next) => {
     const book = await req.body;
     const newBook = await Book.create(book);
-    res.redirect(`/${newBook.id}`);
+    res.redirect(`/books/${newBook.id}`);
   })
 );
-// get /books/:id - Shows book detail form.
+
+// get /books/:id - Shows book detail form. OK
 router.get(
   "/:id",
   asyncHandler(async (req, res, next) => {
@@ -50,12 +52,22 @@ router.get(
   })
 );
 // post /books/:id - Updates book info in the database.
-router.post("/:id", function (req, res, next) {
-  // res.send("post :id route");
-});
+router.post(
+  "/:id/edit",
+  asyncHandler(async (req, res, next) => {
+    const book = await Book.findByPk(req.params.id);
+    await book.update(req.body);
+    res.redirect(`/books/${book.id}`);
+  })
+);
 // post /books/:id/delete - Deletes a book. Careful, this can’t be undone. It can be helpful to create a new “test” book to test deleting.
-router.post("/:id/delete", function (req, res, next) {
-  res.send(":id/delete route");
-});
+router.post(
+  "/:id/delete",
+  asyncHandler(async (req, res, next) => {
+    const book = await Book.findByPk(req.params.id);
+    await book.destroy(req.body);
+    res.redirect(`/books`);
+  })
+);
 
 module.exports = router;
