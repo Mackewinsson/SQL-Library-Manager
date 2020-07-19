@@ -37,9 +37,26 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res, next) => {
-    const book = await req.body;
-    const newBook = await Book.create(book);
-    res.redirect(`/books/${newBook.id}`);
+    let book;
+    try {
+      book = await req.body;
+      const newBook = await Book.create(book);
+      res.redirect(`/books/${newBook.id}`);
+    } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        // checking the error
+        book = await Book.build(req.body);
+        res.render("new-book", {
+          book,
+          errors: error.errors,
+          title: "New Book",
+        });
+        console.log(error.errors);
+      } else {
+        console.log("error in else");
+        throw error; // error caught in the asyncHandler's catch block
+      }
+    }
   })
 );
 
@@ -60,8 +77,12 @@ router.post(
   "/:id/edit",
   asyncHandler(async (req, res, next) => {
     const book = await Book.findByPk(req.params.id);
-    await book.update(req.body);
-    res.redirect(`/books/${book.id}`);
+    if (book) {
+      await book.update(req.body);
+      res.redirect(`/books/${book.id}`);
+    } else {
+      res.sendStatus(404);
+    }
   })
 );
 // post /books/:id/delete - Deletes a book. Careful, this can’t be undone. It can be helpful to create a new “test” book to test deleting.
@@ -69,8 +90,12 @@ router.post(
   "/:id/delete",
   asyncHandler(async (req, res, next) => {
     const book = await Book.findByPk(req.params.id);
-    await book.destroy(req.body);
-    res.redirect(`/books`);
+    if (book) {
+      await book.destroy(req.body);
+      res.redirect(`/books`);
+    } else {
+      res.sendStatus(404);
+    }
   })
 );
 
