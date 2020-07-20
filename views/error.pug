@@ -1,8 +1,7 @@
 extends layout
 
 block content
-  h1= message
-  h2= error.status
-  p
-    a(class="button" href="/") Books
-  pre #{error.stack}
+
+  h1 Server Error
+  p Sorry! There was an unexpected error on the server.
+  a(class="button" href="/") Home
