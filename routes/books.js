@@ -66,7 +66,7 @@ router.get(
     if (book) {
       res.render("update-book", { title: book.title, book });
     } else {
-      res.render("error");
+      res.status(500).render("error");
     }
   })
 );
