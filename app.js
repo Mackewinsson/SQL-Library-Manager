@@ -35,7 +35,15 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("page-not-found");
+  if (err.status === 404) {
+    console.log(err);
+    res.render("page-not-found", { err, title: "Page Not Found" });
+  } else {
+    const err = new Error();
+    err.status = 500;
+    console.log(err);
+    res.render("error", { err, title: "Server Error" });
+  }
 });
 
 module.exports = app;

@@ -8,7 +8,7 @@ function asyncHandler(cb) {
     try {
       await cb(req, res, next);
     } catch (error) {
-      res.status(500).send(error);
+      next(error);
     }
   };
 }
@@ -52,7 +52,9 @@ router.post(
           title: "New Book",
         });
       } else {
-        throw error; // error caught in the asyncHandler's catch block
+        const err = new Error();
+        err.status = 500;
+        throw err;
       }
     }
   })
@@ -66,10 +68,13 @@ router.get(
     if (book) {
       res.render("update-book", { title: book.title, book });
     } else {
-      res.status(500).render("error");
+      const err = new Error();
+      err.status = 500;
+      throw err;
     }
   })
 );
+
 // post /books/:id - Updates book info in the database.
 router.post(
   "/:id/edit",
@@ -94,7 +99,9 @@ router.post(
           title: "Edit Book",
         });
       } else {
-        throw error; // error caught in the asyncHandler's catch block
+        const err = new Error();
+        err.status = 500;
+        throw err;
       }
     }
   })
@@ -108,8 +115,9 @@ router.post(
       await book.destroy(req.body);
       res.redirect(`/books`);
     } else {
-      // res.sendStatus(404);
-      res.render("error");
+      const err = new Error();
+      err.status = 500;
+      throw err;
     }
   })
 );
